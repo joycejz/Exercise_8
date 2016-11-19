@@ -4,8 +4,9 @@ var rawText;
 var joined;
 var story;
 var parsed;
-var draculas
-delimiters = "  ,.!?:;";
+var draculas;
+var chapters;
+var delimiters = "  ,.!?:;";
 
 function preload() {
 	rawText=loadStrings('data/dracula.txt');
@@ -14,7 +15,7 @@ function preload() {
 
 function setup() {
 	createCanvas(500,500);
-	background(255);
+	background(200);
 	imageMode(CENTER);
 	joined = join(rawText, " ");
 	var beforebeginText="338";
@@ -27,13 +28,15 @@ function setup() {
 	var cleaned3=cleaned2.replace(/_/g, '');
 	var cleaned4=cleaned3.replace(/--/g, ' ')
 	parsed=splitTokens(cleaned4, delimiters);
+	chapters=splitChapters(parsed);
 	draculas=numRepeats("Dracula", parsed);
-	for (var i=0; i<draculas; i++) {
-	  var size=random(0.3,1);
-	  bats.push(image(bat, random(width),random(height), bat.width*size, bat.height*size));
+	for (var i=0; i<draculas.length; i++) {
+	  for (var j=0; j<draculas[i][1]; j++) {
+  	  var size=map(draculas[i][0], 0, chapters.length, 0.2, 1.2);
+      bats.push(image(bat, random(width),random(height), bat.width*size, bat.height*size));
+	  }
 	}
 	entries=diaryEntries(parsed);
-	chapters=splitChapters(parsed);
 }
 
 function draw() {
@@ -41,17 +44,22 @@ function draw() {
 	  var x=map(i,0, entries.length, 0, width)
 	  var y=500;
 	  var col=map(entries[i],0,12,0,255)
-	  stroke(col);
+	  stroke(col,0,0);
 	  line(x,y,x,y-2*i);
 	}
 }
 
 function numRepeats(s, wholeText) {
-  var total=0;
-  for (i=0; i<wholeText.length; i++) {
-    if (wholeText[i]==s) {
-      total++;
+  var total=[];
+  var chapters=splitChapters(wholeText);
+  for (i=0; i<chapters.length; i++) {
+    num=0;
+    for (j=0; j<chapters[i].length; j++) {
+      if (chapters[i][j]==s) {
+        num++;
+      }
     }
+    total.push([i+1, num])
   }
   return total;
 }
